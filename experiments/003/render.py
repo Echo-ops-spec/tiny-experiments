@@ -7,14 +7,14 @@ BG=(14,17,23);ACC=(255,184,0);CY=(64,224,208);WH=(235,235,228);RED=(255,80,80);G
 fS=ft("DejaVuSansMono-Bold.ttf",40);fT=ft("DejaVuSans-Bold.ttf",62);fL=ft("DejaVuSans-Bold.ttf",44);fP=ft("DejaVuSansMono-Bold.ttf",56)
 fD=ft("DejaVuSans-Bold.ttf",34);fN=ft("DejaVuSans-Bold.ttf",60);fs=ft("DejaVuSansMono.ttf",28)
 PY=[330,1110]; WINS=[np.cumsum(stay_win),np.cumsum(switch_win)]
-SLOW=5; SLOWF=300; NF=1050
+SLOW=3; GF=32; SLOWF=SLOW*GF; NF=750
 def ctext(d,y,t,f,c): d.text(((1080-d.textlength(t,font=f))/2,y),t,font=f,fill=c)
 def header(d):
     ctext(d,60,"EXPERIMENT 003",fS,ACC)
     ctext(d,125,"Should you switch doors?",fT,WH)
     ctext(d,205,"The Monty Hall problem, played 10,000 times",ft("DejaVuSans.ttf",34),GR)
 def games_at(f):
-    if f<SLOWF: return f//60, (f%60)  # current game index, phase frame
+    if f<SLOWF: return f//GF, int((f%GF)*60/GF)  # phase scaled to 0-59
     u=(f-SLOWF)/(NF-1-SLOWF); return int(SLOW+(G-SLOW)*u**3), 60
 def frame(f,stats=True):
     im=Image.new("RGB",(1080,1920),BG); d=ImageDraw.Draw(im,"RGBA"); header(d)
@@ -72,10 +72,14 @@ def intro():
 def main():
     for f in range(NF):
         im,d=frame(f)
-        if f>=SLOWF: d.text((60,1870),"speeding up",font=fs,fill=GR)
+        if f<SLOWF:
+            gi,ph=games_at(f); t=["You pick a door.","Host opens a goat door.","Stay... or switch?","Reveal!"][min(ph//15,3)]
+            d.rounded_rectangle([140,1040,940,1100],14,fill=(14,17,23,230)); ctext(d,1046,t,ft("DejaVuSans-Bold.ttf",40),ACC)
+        else:
+            d.text((60,1870),"now 10,000 games, faster and faster",font=fs,fill=GR)
         yield im
 def outro():
-    for f in range(190):
+    for f in range(180):
         im,d=frame(NF-1)
         im=Image.alpha_composite(im.convert("RGBA"),Image.new("RGBA",im.size,(14,17,23,min(240,f*12)))); d=ImageDraw.Draw(im); header(d)
         if f>8:
@@ -87,11 +91,11 @@ def outro():
                 ctext(d,770+n*72,t,ft("DejaVuSans.ttf",46),WH if n<3 else CY)
         if f>105:
             ctext(d,1180,"It's not 50/50. Always switch.",ft("DejaVuSans-Bold.ttf",52),ACC)
-            ctext(d,1330,"What should I test next?",ft("DejaVuSans-Bold.ttf",56),ACC)
-            ctext(d,1410,"Comment below.",ft("DejaVuSans.ttf",50),WH)
+            ctext(d,1330,"Would you have switched?",ft("DejaVuSans-Bold.ttf",56),ACC)
+            ctext(d,1410,"Comment STAY or SWITCH.",ft("DejaVuSans.ttf",50),WH)
         yield im.convert("RGB")
 if __name__=="__main__":
     if sys.argv[1]=="still":
-        frame(50)[0].save("st_slow.png"); frame(700)[0].save("st_fast.png"); list(intro())[-1].save("st_in.png"); list(outro())[-1].save("st_out.png")
+        frame(0)[0].save("st_0.png"); frame(40)[0].save("st_slow.png"); frame(500)[0].save("st_fast.png")
     else:
-        enc("s1.mp4",intro()); enc("s2.mp4",main()); enc("s3.mp4",outro())
+        enc("s2.mp4",main()); enc("s3.mp4",outro())
