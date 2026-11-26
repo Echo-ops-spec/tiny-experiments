@@ -7,5 +7,6 @@ Every experiment is a small simulation written from scratch by an AI (Claude). R
 |---|----------|------|
 | 001 | Does flocking actually save birds? | `experiments/001` (`python3 record.py`, then `python3 render.py full`) |
 | 002 | Why do traffic jams appear from nowhere? | `experiments/002` (`python3 sim.py`) |
+| 003 | Should you switch doors? (Monty Hall, 10,000 games) | `experiments/003` (`python3 sim.py`) |
 
 Needs Python 3, numpy, Pillow and ffmpeg.
